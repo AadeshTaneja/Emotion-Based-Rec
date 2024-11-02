@@ -7,12 +7,12 @@ Original file is located at
     https://colab.research.google.com/drive/1WLi9CDIskLYDAtxZFv8aMnox-r4Q--o1
 """
 
-dataset_path = "datasets/fer2013"  # Path to store the FER2013 dataset
+dataset_path = "datasets/fer2013" 
 
 if not os.path.exists(dataset_path):
     print("Downloading FER2013 dataset...")
     path = kagglehub.dataset_download("msambare/fer2013")
-    print("Downloaded dataset to:", path)  # Print path to check it
+    print("Downloaded dataset to:", path)
 else:
     print("Dataset already exists at:", dataset_path)
 
@@ -42,20 +42,16 @@ test_dir = os.path.join(dataset_path, 'test')
 if not os.path.exists(train_dir) or not os.path.exists(test_dir):
     raise FileNotFoundError("Train and test directories not found in extracted dataset.")
 
-#ImageDataGenerator for loading and preprocessing images
-# Image data generator with augmentation for training
 train_datagen = ImageDataGenerator(
-    rescale=1./255,           # Normalize pixel values
+    rescale=1./255,      
     rotation_range=10,
     width_shift_range=0.1,
     height_shift_range=0.1,
     horizontal_flip=True
 )
 
-# Simple rescaling for validation/testing
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-# Create training and validation generators
 train_generator = train_datagen.flow_from_directory(
     train_dir,
     target_size=(48, 48),
@@ -72,7 +68,6 @@ validation_generator = test_datagen.flow_from_directory(
     class_mode='categorical'
 )
 
-#Define the CNN model architecture
 model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(48, 48, 1)),
     MaxPooling2D((2, 2)),
@@ -89,13 +84,12 @@ model = Sequential([
     Flatten(),
     Dense(256, activation='relu'),
     Dropout(0.5),
-    Dense(train_generator.num_classes, activation='softmax')  # Number of output classes based on folder structure
+    Dense(train_generator.num_classes, activation='softmax')
 ])
 
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 model.summary()
 
-#Train the Model with the Data Generators
 epochs = 50
 
 history = model.fit(
@@ -105,10 +99,8 @@ history = model.fit(
     verbose=1
 )
 
-#Save the model after training
 model.save('emotion_detection_model.h5')
 print("Model saved as emotion_detection_model.h5")
 
-#Evaluate the model
 loss, accuracy = model.evaluate(validation_generator, verbose=0)
 print(f"Validation Accuracy: {accuracy:.2f}")
